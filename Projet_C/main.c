@@ -21,6 +21,7 @@ typedef struct{
     int fin;
 }caisse_t; 
 
+// fonction qui initialise un client à partir d'une ligne venant d'un fichier texte
 client_t *initialiser_client(char * ligne){
     client_t *client = (client_t*) malloc(sizeof(client_t));
     client->id = (char*) malloc(sizeof(char)*sizeof(ligne));

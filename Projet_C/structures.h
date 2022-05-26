@@ -8,7 +8,7 @@ typedef struct{
 
 typedef struct{
     char* id;
-    int sortie;
+    //int sortie;
     int entree;
     int nb_art;
     article_t *list_art;

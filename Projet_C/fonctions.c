@@ -4,12 +4,21 @@
 #include<string.h>
 #include<sys/stat.h>
 
-article_t creer_article(int x, int y){
-    article_t article;
-    article.x = x;
-    article.y = y;
-    return article;
-};
+void afficher_clients(client_t * liste_clients, int taille){
+    for(int i = 0; i < taille; i++){
+        printf("%s %d %d\n",liste_clients[i].id, liste_clients[i].entree,liste_clients[i].nb_art);
+        for(int j = 0; j < liste_clients[i].nb_art; j++){
+            printf("%d%d ",liste_clients[i].list_art[j].x,liste_clients[i].list_art[j].y);
+        }
+        printf("\n");
+    }
+}
+
+void afficher_caisses(caisse_t * liste_caisses){
+    for(int i = 0; i < 7; i++){
+        printf("numero : %d\ndebut : %d\nfin : %d\n",liste_caisses[i].numero,liste_caisses[i].debut,liste_caisses[i].fin);
+    }
+}
 
 caisse_t* initialiser_caisses(char* caisses, caisse_t* liste_caisses){
     //caisses is the file name
@@ -19,8 +28,9 @@ caisse_t* initialiser_caisses(char* caisses, caisse_t* liste_caisses){
     int i = 0;
     while(fgets(read, 500, fichier) != NULL){
         caisse_t caisse;
-        strtok(read, " ");
-        caisse.numero = i+1;
+        char* id = strtok(read, " ");
+        memmove(id, id+1, strlen(id));        
+        caisse.numero = atoi(id);
         char* debut = strtok(NULL, " ");
         caisse.debut = atoi(debut);
         char* fin = strtok(NULL, " ");
@@ -42,7 +52,9 @@ client_t* initialiser_clients(char* clients, client_t* liste_clients){
     int j = 0;
     while(fgets(read, 500, fichier) != NULL){
         client_t client;
-        client.id = strtok(read, " ");
+        char *tmp = strtok(read, " ");
+        client.id = malloc(sizeof(char)*15);
+        strcpy(client.id,tmp);
         client.entree = atoi(strtok(NULL, " "));
         client.nb_art = atoi(strtok(NULL, " "));
         client.list_art = malloc(sizeof(article_t)*client.nb_art);
@@ -50,8 +62,8 @@ client_t* initialiser_clients(char* clients, client_t* liste_clients){
             article_t article;
             char* art;
             art = strtok(NULL, " ");
-            article.x = art[1];
-            article.y = art[2];
+            article.x = art[1]-48;
+            article.y = art[2]-48;
             client.list_art[i] = article; 
         }
         liste_clients[j] = client;
@@ -62,122 +74,13 @@ client_t* initialiser_clients(char* clients, client_t* liste_clients){
     return liste_clients;
 }
 
-/*caisse_t *initialiser_caisse(char * ligne){
-    caisse_t *caisse = malloc(sizeof(caisse_t));
-    caisse->numero = ligne[1]-48;
-    int i = 3;
-    char *tmp = (char*) malloc(sizeof(char)*10);
-    char *tmp2 = (char*) malloc(sizeof(char)*10);
-    while(ligne[i]!= ' '){
-        tmp[i-3] = ligne[i];
-        i++;
-    }i++;
-    int j = i;
-    while(ligne[j] != ' '){
-         tmp2[j-i] = ligne[j];
-         j++;   
+void liberer_clients(client_t * liste_clients, int taille){
+    for(int i = 0; i < taille; i++){
+        free(liste_clients[i].id);
+        free(liste_clients[i].list_art);
     }
-    caisse->debut = atoi((const char*)tmp);
-    caisse->fin = atoi((const char*)tmp2);
-    free(tmp);
-    free(tmp2);
-    return caisse;
-};
-
-client_t *initialiser_client(char * ligne){
-    client_t *client = (client_t*) malloc(sizeof(client_t));
-    client->id = (char*) malloc(sizeof(char)*sizeof(ligne));
-    int i = 0;
-    while(ligne[i]!= ' '){
-        client->id[i] = ligne[i];
-        i++;
-    }i++;
-    int j = i;
-    char *tmp = (char*) malloc(sizeof(char)*6);
-    while(ligne[j] != ' '){
-        tmp[j-i] = ligne[j];
-        j++;
-    }j++;
-    int k = j;
-    client->entree = atoi(tmp); // Valgrind donne une erreur ici on utilise atoi sur char* dont une partie n'est pas initialisée
-    char *tmp2 = (char*) malloc(sizeof(char)*6); // Fonctionne quand même mais à modifier
-    while(ligne[k] != ' '){
-        tmp2[k-j] = ligne[k];
-        k++;
-    }k++;
-    client->nb_art = atoi(tmp2);
-    client->list_art = (article_t*) malloc(sizeof(article_t)*client->nb_art);
-    free(tmp);
-    free(tmp2);
-    for(int i = 0; i < client->nb_art; i ++){
-        client->list_art[i] = creer_article(ligne[k+1]-48,ligne[k+2]-48);                                                                                                                                                                                                                  
-        k+=4;
-    }
-    return client;
+    free(liste_clients);
 }
-
-void free_client(client_t * client){
-    free(client->id);
-    free(client->list_art);
-    free(client);
-}
-
-client_t **initialiser_tableau_client(char* filename){
-    FILE* fichier_client = fopen(filename, "r");
-    client_t  **array_client = (client_t**)malloc(sizeof(client_t)*get_nbligne(filename));
-    struct stat sb;
-    stat(filename, &sb);
-    char *file_contents = malloc(sizeof(char)*sb.st_size);
-    int i =0;
-    while (fscanf(fichier_client, "%[^\n] ", file_contents) != EOF) { 
-        array_client[i] = initialiser_client(file_contents);
-        afficher_client(array_client[i]);
-        i++;
-    }
-    free(file_contents);
-    fclose(fichier_client);
-    return array_client;
-};
-
-caisse_t **initialiser_tableau_caisse(char* filename){ //erreur dans cette fonction
-    FILE* fichier_caisse = fopen(filename, "r");
-    caisse_t  **array_caisse = (caisse_t**)malloc(sizeof(caisse_t)*7);
-    struct stat sb;
-    stat(filename, &sb);
-    char *file_contents = malloc(sizeof(char)*sb.st_size);
-    int i = 0;
-    while (fscanf(fichier_caisse, "%[^\n] ", file_contents) != EOF) { 
-        array_caisse[i] = initialiser_caisse(file_contents);
-        printf("%s\n", file_contents);
-        afficher_caisse(array_caisse[i]);
-        i++;
-    }
-    free(file_contents);
-    fclose(fichier_caisse);
-    return array_caisse;
-};
-void free_tableau_client(client_t ** tableau_client){
-    for(int i = 0; i < 4; i++){
-        free_client(tableau_client[i]);
-    }
-    free(tableau_client);
-}
-
-void free_tableau_caisse(caisse_t ** tableau_caisse){
-    for(int i = 0; i < 7; i++){
-        free(tableau_caisse[i]);
-    }
-    free(tableau_caisse);
-}
-
-void afficher_client(client_t * client){
-    printf("Id : %s \nsortie : %d \nentree : %d\nnb_art: %d\n",client->id,client->sortie,client->entree,client->nb_art);
-    for(int i = 0; i < client->nb_art; i++){
-        printf("article %d : %d%d\n",i,client->list_art[i].x,client->list_art[i].y);
-    }
-};
-*/
-
 
 int get_nbligne(char * filename){
     FILE * fichier = fopen(filename,"r") ;
@@ -194,12 +97,3 @@ int get_nbligne(char * filename){
     fclose(fichier);
     return nLignes;
 };
-
-//fonction qui lit le nombre de lignes du fichier client et crée des clients
-
-/*void parse(char* client_source, char* caisse_source){
-    //client_t ** tableau_client = initialiser_tableau_client(client_source);
-    caisse_t **tableau_caisse = initialiser_tableau_caisse(caisse_source);
-    //free_tableau_caisse(tableau_caisse);
-    //free_tableau_client(tableau_client);
-};*/

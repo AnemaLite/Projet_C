@@ -36,6 +36,7 @@ caisse_t* initialiser_caisses(char* caisses, caisse_t* liste_caisses){
         char* fin = strtok(NULL, " ");
         caisse.fin = atoi(fin);
         liste_caisses[i] = caisse;
+        liste_caisses[i].nb = 0;
         memset(read, 0, 500);
         i++;
 
@@ -43,7 +44,6 @@ caisse_t* initialiser_caisses(char* caisses, caisse_t* liste_caisses){
     fclose(fichier);
     return liste_caisses;
 }
-
 
 client_t* initialiser_clients(char* clients, client_t* liste_clients){
     FILE* fichier = NULL;
@@ -80,6 +80,60 @@ void liberer_clients(client_t * liste_clients, int taille){
         free(liste_clients[i].list_art);
     }
     free(liste_clients);
+}
+void liberer_caisses(caisse_t * liste_caisses){
+    for(int i = 0; i < 7; i++){
+        //free(liste_caisses[i].occupation->client);
+        free(liste_caisses[i].occupation);
+    }
+    free(liste_caisses);
+}
+
+int temps_magasin(client_t client){
+    int temps = client.nb_art*15;
+    for(int i = 0; i < client.nb_art-1; i++){
+        temps += temps_rayons(client.list_art[i].x,client.list_art[i].y,client.list_art[i+1].x,client.list_art[i+1].y);
+    }
+    //temps += temps_rayons(client.list_art[client.nb_art-1].x,client.list_art[client.nb_art-1].y,caisse,0);
+    return temps;
+}
+
+int temps_rayons(int i, int j, int i2, int j2){
+    if((i == i2) && (j == j2))
+        return 0;
+    if(i == 0 && j == 0){
+        return 5 + temps_rayons(0, 1, i2, j2);
+    }
+    if(i == i2){
+        return abs(j-j2)*10;
+    }
+    else{
+        return ((5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10 < (j-1)*10+5+abs(i2-i)*8+5+10*i2) ? (5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10 : (j-1)*10+5+abs(i2-i)*8+5+10*i2;
+    }
+}
+
+void arrivee_caisse_client(client_t client, caisse_t* caisses, int* caisse, int* temps){
+    *temps = client.entree + temps_magasin(client) + (client.list_art[client.nb_art-1].y-1)*10+5;
+    int res = 0;
+    int min = 8;
+    int index;
+    for(int i = 0; i < 7; i++){
+        if(*temps >= caisses[i].debut && *temps <= caisses[i].fin){
+            if(abs(caisses[i].numero-client.list_art[client.nb_art-1].x) < min){
+                min = abs(caisses[i].numero-client.list_art[client.nb_art-1].x);
+                res = caisses[i].numero;
+                index = i;
+            }
+            if(abs(caisses[i].numero-client.list_art[client.nb_art-1].x) == min && (i < index )){
+                index = i;
+                res = caisses[i].numero;
+                index = i;
+            }
+        }
+    }
+    *temps += 8*min;
+    *caisse = res;
+
 }
 
 int get_nbligne(char * filename){

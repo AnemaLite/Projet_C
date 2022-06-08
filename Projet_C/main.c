@@ -31,16 +31,16 @@ int main(int argc, char* argv[]){
 
     caisse_t* caisses = malloc(sizeof(caisse_t)*7);
     caisses = initialiser_caisses(argv[2],caisses);
-    /*for(int i = 0; i < 7; i++){
+    for(int i = 0; i < 7; i++){
         caisses[i].occupation = malloc(sizeof(occupation_t)*l);
-    }*/
-    caisses->occupation = malloc(sizeof(occupation_t)*l);
-
+    }
 
     caisse_t* caisses2 = malloc(sizeof(caisse_t)*7);
-    caisses2->occupation = malloc(sizeof(occupation_t)*l);
-    caisses2 = initialiser_caisses(argv[2], caisses);
-    memcpy(caisses2, caisses, 7);
+    caisses2 = initialiser_caisses(argv[2], caisses2);
+    for(int i  = 0; i < 7; i++){
+        caisses2[i].occupation = malloc(sizeof(occupation_t)*l);
+    }
+    //memcpy(caisses2, caisses, 7);
     qsort(clients, l, sizeof(client_t), cmp_clients);
     /*  ouverture_caisses = qsort
     fermetures_caisses = qsort */
@@ -72,13 +72,20 @@ int main(int argc, char* argv[]){
         }
     }
 
-    for(int i = 0; i < 8; i++){
+    //for testing
+    for(int i = 0; i < 7; i++){
         for(int j = 0; j < caisses[i].nb; j++){
-            printf("Caisse %d : %d %d %s\n", j, caisses[i].occupation[j].debut, caisses[i].occupation[j].fin, caisses[i].occupation[j].client);
+            printf("Caisse %d : %d %d %s\n", i+1, caisses[i].occupation[j].debut, caisses[i].occupation[j].fin, caisses[i].occupation[j].client);
         }
     }
     //printf("%d\n",temps_magasin(liste[0],1));
     liberer_clients(clients,l);
+    for(int i = 0; i < 7; i++){
+        free(caisses[i].occupation);
+        free(caisses2[i].occupation);
+    }
+    free(caisses);
+    free(caisses2);
     return 0;
 }
 

@@ -23,6 +23,12 @@ int cmp_caisses_2(const void * ptr1, const void * ptr2){ // tri croissant sur l'
     return (int) (premier.fin - second.fin); 
 }
 
+int cmp_arrivee_client(const void * ptr1, const void * ptr2){ // tri sur l'heure d'arrivee du client
+    arrivee_client_t premier = *(const arrivee_client_t*) ptr1;
+    arrivee_client_t second = *(const arrivee_client_t*) ptr2;
+    return (int) (premier.temps - second.temps); 
+}
+
 int main(int argc, char* argv[]){
     int l = get_nbligne(argv[1]);
 
@@ -51,6 +57,46 @@ int main(int argc, char* argv[]){
 
 
     int temps = 0, res = 0;
+    arrivee_client_t* arrivee_client = malloc(sizeof(arrivee_client_t)*l);
+    for(int i = 0; i < l; i++){
+        arrivee_caisse_client(clients[i], caisses, &res, &temps);
+        arrivee_client_t tmp;
+        tmp.client = clients[i];
+        tmp.caisse = res;
+        tmp.temps = temps;
+        arrivee_client[i] = tmp;
+    }
+    qsort(arrivee_client, l, sizeof(arrivee_client_t), cmp_arrivee_client);
+
+    //testing : imprime caisse, heure de début de service à la caisse et heure de fin de service
+    for(int i = 0; i < l; i++){
+        printf("%s : %d\n", arrivee_client[i].client.id, arrivee_client[i].temps);
+    }
+
+    //fill occupation
+    for(int i = 0; i < l; i++){
+        for(int j = 0; j < 7; j++){
+            if(caisses[j].numero == arrivee_client[i].caisse){
+                occupation_t occupation;
+                occupation.client = arrivee_client[i].client.id;
+                if(caisses[j].nb == 0){
+                    occupation.debut = arrivee_client[i].temps;
+                    occupation.fin = occupation.debut + 5*arrivee_client[i].client.nb_art;
+                    caisses[j].occupation[caisses[j].nb] = occupation;
+                }
+                else{
+                    int min = (caisses[j].occupation[caisses[j].nb-1].fin > arrivee_client[i].temps) ? caisses[j].occupation[caisses[j].nb-1].fin : arrivee_client[i].temps;
+                    occupation.debut = min;
+                    occupation.fin = occupation.debut + 5*arrivee_client[i].client.nb_art;
+                    caisses[j].occupation[caisses[j].nb] = occupation;
+                }
+                caisses[j].nb++;
+                break;
+            }
+        }
+    }
+
+    /*
     for(int i = 0; i < l; i++){
         arrivee_caisse_client(clients[i], caisses, &res, &temps);
         for(int j = 0; j < 7; j++){
@@ -71,7 +117,7 @@ int main(int argc, char* argv[]){
                 break;
             }
         }
-    }
+    }*/
 
     //for testing
     for(int i = 0; i < 7; i++){
@@ -87,7 +133,7 @@ int main(int argc, char* argv[]){
     }
     free(caisses);
     free(caisses2);
+    free(arrivee_client);
     return 0;
 }
-
 

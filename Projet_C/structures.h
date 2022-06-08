@@ -28,4 +28,11 @@ typedef struct{
     int nb;
 }caisse_t; 
 
+typedef struct{
+    client_t client;
+    int caisse;
+    int temps;
+}arrivee_client_t;
+
+
 #endif

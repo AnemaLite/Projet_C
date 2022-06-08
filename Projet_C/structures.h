@@ -7,6 +7,12 @@ typedef struct{
 }article_t;
 
 typedef struct{
+    char* client;
+    int debut;
+    int fin;
+}occupation_t;
+
+typedef struct{
     char* id;
     //int sortie;
     int entree;
@@ -18,6 +24,8 @@ typedef struct{
     int numero;
     int debut;
     int fin;
+    occupation_t* occupation;
+    int nb;
 }caisse_t; 
 
 #endif

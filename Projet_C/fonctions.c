@@ -108,6 +108,11 @@ int temps_rayons(int i, int j, int i2, int j2){
         return abs(j-j2)*10;
     }
     else{
+        if(i == 0){
+            return (5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10; // ici
+        }else if(i2 == 0){
+            return (5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10; // et ici
+        }
         return ((5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10 < (j-1)*10+5+abs(i2-i)*8+5+10*i2) ? (5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10 : (j-1)*10+5+abs(i2-i)*8+5+10*i2;
     }
 }

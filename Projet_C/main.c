@@ -40,14 +40,15 @@ int main(int argc, char* argv[]){
     for(int i  = 0; i < 7; i++){
         caisses2[i].occupation = malloc(sizeof(occupation_t)*l);
     }
-    //memcpy(caisses2, caisses, 7);
+    memcpy(caisses2, caisses, 7);
     qsort(clients, l, sizeof(client_t), cmp_clients);
     /*  ouverture_caisses = qsort
     fermetures_caisses = qsort */
 
-    afficher_caisses(caisses);
+    //afficher_caisses(caisses);
     qsort(caisses, 7, sizeof(caisse_t), cmp_caisses);
     qsort(caisses2, 7, sizeof(caisse_t), cmp_caisses_2);
+
 
     int temps = 0, res = 0;
     for(int i = 0; i < l; i++){
@@ -88,4 +89,5 @@ int main(int argc, char* argv[]){
     free(caisses2);
     return 0;
 }
+
 

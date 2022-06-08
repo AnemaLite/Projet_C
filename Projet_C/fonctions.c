@@ -91,13 +91,14 @@ void liberer_caisses(caisse_t * liste_caisses){
 
 int temps_magasin(client_t client){
     int temps = client.nb_art*15;
+    temps += temps_rayons(0,0,client.list_art[0].x,client.list_art[0].y);
     for(int i = 0; i < client.nb_art-1; i++){
         temps += temps_rayons(client.list_art[i].x,client.list_art[i].y,client.list_art[i+1].x,client.list_art[i+1].y);
     }
     //temps += temps_rayons(client.list_art[client.nb_art-1].x,client.list_art[client.nb_art-1].y,caisse,0);
     return temps;
 }
-
+/*
 int temps_rayons(int i, int j, int i2, int j2){
     if((i == i2) && (j == j2))
         return 0;
@@ -108,14 +109,31 @@ int temps_rayons(int i, int j, int i2, int j2){
         return abs(j-j2)*10;
     }
     else{
-        if(i == 0){
-            return (5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10; // ici
-        }else if(i2 == 0){
-            return (5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10; // et ici
-        }
         return ((5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10 < (j-1)*10+5+abs(i2-i)*8+5+10*i2) ? (5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10 : (j-1)*10+5+abs(i2-i)*8+5+10*i2;
     }
+}*/
+int temps_rayons(int i, int j, int i2, int j2){
+    int haut = (5- j)*10+5+7*abs(i2-i) + 5 + (5-j2)*10;
+    int bas = (j-1)*10 + 5 + 8*abs(i-i2) + 5 + (j2-1)*10;
+    if((i == i2) && (j == j2))
+        return 0;
+    if(i == 0 && j == 0){
+        return 5 + temps_rayons(0, 1, i2, j2);
+    }
+    if(i == i2){
+        return abs(j-j2)*10;
+    }
+    else{
+        if(i == 0){
+            return haut; 
+        }else if(i2 == 0){
+            return haut;
+        }
+        //printf("haut : %d \nbas : %d\n",haut,bas);
+        return haut < bas  ? haut : bas;
+    }
 }
+// (j-1)*10 + 5 + 8*abs(i-i2) + 5 + (j2-1)*10
 
 void arrivee_caisse_client(client_t client, caisse_t* caisses, int* caisse, int* temps){
     *temps = client.entree + temps_magasin(client) + (client.list_art[client.nb_art-1].y-1)*10+5;

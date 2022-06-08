@@ -1,5 +1,5 @@
 output: main.o fonctions.o
-	gcc main.o fonctions.o -o output
+	gcc -g -Wall main.o fonctions.o -o output
 
 main.o: main.c
 	gcc -c -g -Wall main.c
